@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: avions
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - back_db_net
+
+  back_flight_delay:
+    build:
+      context: .
+      dockerfile: back_flight_delay/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=avions
+      - DB_USER=user
+      - DB_PASS=password
+    networks:
+      - back_db_net
+      - front_back_net
+
+  front_flight_delay:
+    build:
+      context: .
+      dockerfile: front_flight_delay/Dockerfile
+    ports:
+      - "8501:8501"
+    depends_on:
+      - back_flight_delay
+    environment:
+      - API_URL=http://back_flight_delay:8000
+    networks:
+      - front_back_net
+
+volumes:
+  db_data:
+
+networks:
+  front_back_net:
+    driver: bridge
+  back_db_net:
+    driver: bridge

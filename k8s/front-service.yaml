@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: romaindhs/frontend:latest
+          ports:
+            - containerPort: 8501
+          volumeMounts:
+            - name: app-py-volume
+              mountPath: /app/front_flight_delay/app.py
+              subPath: app.py
+      volumes:
+        - name: app-py-volume
+          configMap:
+            name: app-py-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: front
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501
+  type: NodePort

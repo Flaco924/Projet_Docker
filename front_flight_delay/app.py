@@ -2,8 +2,9 @@ import streamlit as st
 import requests
 import pydeck as pdk
 import pandas as pd
+import os
 
-API_URL = "http://back:8000"
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 st.title("✈️ Flight Delay Prediction")
 
